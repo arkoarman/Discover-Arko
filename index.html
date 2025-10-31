@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Get to know Arko</title>
+  <meta name="description" content="Student CEO style portfolio — neon, glossy, animated and responsive." />
+  <!-- Google Font (works if online) -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <style>
+    /* --------------------------
+       CSS VARIABLES & BASE
+       --------------------------*/
+    :root{
+      --bg-1: #070617;
+      --bg-2: #0f1020;
+      --glass: rgba(255,255,255,0.04);
+      --glass-2: rgba(255,255,255,0.03);
+      --accent1: #7c3aed;
+      --accent2: #06b6d4;
+      --text: #e6eef8;
+      --muted: #98a0b3;
+      --success: #25d366;
+      --card-radius: 18px;
+      --transition: 300ms cubic-bezier(.2,.9,.3,1);
+      --cursor-size: 14px;
+    }
+    /* Light theme variables (switched by .light on body) */
+    body.light {
+      --bg-1: #f8fafc;
+      --bg-2: #e6f0ff;
+      --glass: rgba(255,255,255,0.6);
+      --glass-2: rgba(255,255,255,0.45);
+      --accent1: #1e3a8a;
+      --accent2: #0ea5e9;
+      --text: #071124;
+      --muted: #475569;
+    }
+
+    html,body{
+      height:100%;
+      margin:0;
+      font-family: "Poppins", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      background: radial-gradient(1200px 600px at 10% 10%, rgba(124,58,237,0.08), transparent 6%),
+                  radial-gradient(900px 400px at 90% 90%, rgba(6,182,212,0.06), transparent 6%),
+                  linear-gradient(180deg,var(--bg-1),var(--bg-2));
+      color:var(--text);
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+      overflow-x:hidden;
+      transition: background var(--transition), color var(--transition);
+    }
+
+    /* page fade in/out for smooth transitions */
+    .page {
+      opacity:0;
+      transform: translateY(8px);
+      transition: opacity 500ms ease, transform 500ms ease;
+    }
+    .page.loaded {
+      opacity:1;
+      transform:none;
+    }
+
+    /* --------------------------
+       CUSTOM CURSOR
+       --------------------------*/
+    .cursor {
+      pointer-events:none;
+      position:fixed;
+      z-index:99999;
+      width:var(--cursor-size);
+      height:var(--cursor-size);
+      border-radius:50%;
+      transform:translate(-50%,-50%);
+      mix-blend-mode:screen;
+      box-shadow:0 0 12px rgba(124,58,237,0.8), 0 0 28px rgba(6,182,212,0.45);
+      transition: transform 150ms ease, width 200ms ease, height 200ms ease, box-shadow 200ms ease;
+    }
+    .cursor.small { width:8px; height:8px; box-shadow:0 0 6px rgba(124,58,237,0.6); }
+    .cursor.hidden { opacity:0; }
+
+    /* --------------------------
+       NAV / TOGGLE
+       --------------------------*/
+    .topbar {
+      position:fixed;
+      top:18px;
+      left:50%;
+      transform:translateX(-50%);
+      z-index:1000;
+      display:flex;
+      gap:12px;
+      align-items:center;
+      backdrop-filter: blur(8px) saturate(120%);
+      padding:6px;
+      border-radius:999px;
+      border: 1px solid rgba(255,255,255,0.04);
+      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      box-shadow:0 6px 20px rgba(2,6,23,0.45);
+    }
+    .brand {
+      padding:6px 12px;
+      display:flex;
+      gap:10px;
+      align-items:center;
+      cursor:default;
+    }
+    .brand .dot {
+      width:10px;height:10px;border-radius:50%;
+      background:linear-gradient(90deg,var(--accent1),var(--accent2));
+      box-shadow: 0 0 10px rgba(124,58,237,0.4);
+    }
+    .brand h4 { margin:0; font-size:0.95rem; font-weight:700; letter-spacing:0.2px; color:var(--text); }
+
+    .toggle-btn {
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:8px 12px;
+      border-radius:999px;
+      background:transparent;
+      border:1px solid rgba(255,255,255,0.04);
+      cursor:pointer;
+      color:var(--text);
+      transition: transform var(--transition), background var(--transition), box-shadow var(--transition);
+    }
+    .toggle-btn:hover { transform: translateY(-4px); box-shadow:0 8px 26px rgba(0,0,0,0.25); }
+
+    /* --------------------------
+       MAIN LAYOUT
+       --------------------------*/
+    .wrap {
+      max-width:1180px;
+      margin:120px auto 80px;
+      padding:24px;
+      z-index:5;
+      position:relative;
+    }
+    .grid {
+      display:grid;
+      grid-template-columns: 1fr 380px;
+      gap:40px;
+      align-items:center;
+    }
+
+    @media (max-width:900px){
+      .wrap { margin:80px 16px 40px; }
+      .grid { grid-template-columns: 1fr; }
+    }
+
+    /* --------------------------
+       HERO TEXT (typewriter + shine)
+       --------------------------*/
+    .hero {
+      display:flex;
+      flex-direction:column;
+      gap:18px;
+    }
+    .eyebrow { font-size:0.85rem; color:var(--muted); letter-spacing:1px; text-transform:uppercase; }
+    .title {
+      font-size:2.6rem;
+      line-height:1;
+      font-weight:700;
+      letter-spacing:-0.6px;
+      margin-top:6px;
+      position:relative;
+      overflow:hidden;
+      display:inline-block;
+      -webkit-mask-image: linear-gradient(90deg, rgba(0,0,0,1) 40%, rgba(0,0,0,0.1) 100%);
+    }
+
+    /* shine effect */
+    .title::after{
+      content:'';
+      position:absolute;
+      left:-60%;
+      top:0;
+      width:40%;
+      height:100%;
+      transform:skewX(-15deg);
+      background:linear-gradient(90deg, rgba(255,255,255,0.0), rgba(255,255,255,0.65), rgba(255,255,255,0.0));
+      animation: shine 3s linear infinite;
+      mix-blend-mode:overlay;
+      pointer-events:none;
+    }
+    @keyframes shine { to { left:120%; } }
+
+    /* subtitle (typewriter with caret) */
+    .subtitle {
+      font-size:1rem;
+      color:var(--muted);
+      display:inline-block;
+      white-space:nowrap;
+      overflow:hidden;
+      border-right: 2px solid rgba(255,255,255,0.12);
+      animation: typing 3.6s steps(30,end) 0.6s 1 normal both, blinkCaret 800ms step-end infinite;
+      width:0;
+    }
+    @keyframes typing { from { width:0; } to { width: 100%; } }
+    @keyframes blinkCaret { 50% { border-color: transparent; } }
+
+    .lead { margin-top:12px; color:var(--muted); font-size:1.02rem; max-width:62ch; line-height:1.7; }
+
+    /* CTA buttons */
+    .cta-row { margin-top:18px; display:flex; gap:12px; flex-wrap:wrap; align-items:center; }
+    .btn {
+      padding:12px 18px;
+      border-radius:12px;
+      display:inline-flex; gap:10px; align-items:center;
+      background:linear-gradient(90deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      border:1px solid rgba(255,255,255,0.06);
+      color:var(--text);
+      cursor:pointer;
+      transition: transform var(--transition), box-shadow var(--transition), background var(--transition);
+      text-decoration:none;
+    }
+    .btn.primary {
+      background: linear-gradient(90deg,var(--accent1),var(--accent2));
+      color:white;
+      box-shadow:0 10px 30px rgba(124,58,237,0.18);
+      border: none;
+    }
+    .btn:hover { transform:translateY(-5px); }
+
+    /* --------------------------
+       PHOTO CARD (3D tilt + glossy)
+       --------------------------*/
+    .card {
+      border-radius:var(--card-radius);
+      padding:14px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));
+      border:1px solid rgba(255,255,255,0.05);
+      box-shadow: 0 10px 40px rgba(2,6,23,0.6);
+      transition: transform var(--transition), box-shadow var(--transition);
+      perspective: 1200px;
+    }
+    .photo-wrap {
+      position:relative;
+      border-radius:14px;
+      overflow:hidden;
+      transform-style: preserve-3d;
+      will-change: transform;
+      transition: transform 400ms cubic-bezier(.2,.9,.3,1);
+    }
+    .photo-wrap img {
+      display:block;
+      width:100%;
+      height:100%;
+      object-fit:cover;
+      transform-origin:center;
+    }
+    .glass-badge {
+      position:absolute;
+      left:14px; bottom:14px;
+      background: linear-gradient(90deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));
+      padding:8px 12px;
+      border-radius:12px;
+      backdrop-filter: blur(8px);
+      border:1px solid rgba(255,255,255,0.06);
+      display:flex; flex-direction:column;
+      gap:2px;
+      box-shadow:0 6px 22px rgba(124,58,237,0.08);
+    }
+    .glass-badge h5 { margin:0; font-size:0.95rem; color:var(--accent2); }
+    .glass-badge p { margin:0; font-size:0.78rem; color:var(--muted); }
+
+    /* subtle floating accent behind photo */
+    .glow-circle {
+      position:absolute; right:-50px; top:-70px;
+      width:240px; height:240px; border-radius:50%;
+      background: radial-gradient(circle, rgba(124,58,237,0.14), transparent 45%);
+      filter: blur(30px);
+      transform: translateZ(-1px);
+      pointer-events:none;
+      z-index:0;
+    }
+
+    /* --------------------------
+       ABOUT / ACHIEVEMENTS (cards)
+       --------------------------*/
+    .about {
+      margin-top:48px;
+      display:grid;
+      grid-template-columns: 1fr 320px;
+      gap:28px;
+      align-items:start;
+    }
+    .about .panel {
+      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      padding:26px;
+      border-radius:16px;
+      border:1px solid rgba(255,255,255,0.04);
+    }
+    .about h3 { margin:0 0 12px 0; color:var(--accent1); font-size:1.4rem; }
+    .about p { color:var(--muted); line-height:1.7; }
+
+    .achievements {
+      display:grid; gap:12px;
+      margin-top:12px;
+    }
+    .ach-card {
+      display:flex; gap:12px; align-items:center;
+      background: linear-gradient(90deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      padding:12px; border-radius:12px; border:1px solid rgba(255,255,255,0.03);
+      transition: transform var(--transition), box-shadow var(--transition);
+    }
+    .ach-card:hover { transform: translateY(-6px); box-shadow: 0 18px 40px rgba(7,8,20,0.6); }
+    .ach-icon { width:46px; height:46px; border-radius:10px; display:flex; align-items:center; justify-content:center;
+                background: linear-gradient(90deg,var(--accent1),var(--accent2)); color:white; font-weight:700; }
+    .ach-info h4 { margin:0; font-size:1rem; }
+    .ach-info p { margin:0; color:var(--muted); font-size:0.86rem; }
+
+    /* --------------------------
+       SOCIALS (animated icons)
+       --------------------------*/
+    .socials {
+      display:flex; gap:12px; flex-wrap:wrap; margin-top:18px;
+    }
+    .social-btn {
+      display:inline-flex; align-items:center; gap:8px;
+      padding:10px 14px; border-radius:12px; color:var(--text);
+      text-decoration:none; border:1px solid rgba(255,255,255,0.04);
+      background: linear-gradient(90deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      transition: transform var(--transition), box-shadow var(--transition);
+      position:relative; overflow:hidden;
+    }
+    .social-btn:hover { transform: translateY(-6px); box-shadow: 0 12px 34px rgba(0,0,0,0.5); }
+    .social-btn .sicon { width:18px; height:18px; display:inline-block; }
+    /* small glowing pulse */
+    .social-btn::after {
+      content:'';
+      position:absolute; inset:0; z-index:-1;
+      background: linear-gradient(90deg,var(--accent1),var(--accent2));
+      opacity:0; filter: blur(22px); transform:scale(0.9);
+      transition: opacity var(--transition);
+    }
+    .social-btn:hover::after { opacity:0.18; }
+
+    /* --------------------------
+       FOOTER
+       --------------------------*/
+    footer { margin-top:48px; text-align:center; color:var(--muted); font-size:0.9rem; }
+
+    /* --------------------------
+       ANIMATIONS & SCROLL-IN (intersection observer adds .in)
+       --------------------------*/
+    .reveal { opacity:0; transform: translateY(24px); transition: opacity 700ms cubic-bezier(.2,.9,.3,1), transform 700ms cubic-bezier(.2,.9,.3,1); }
+    .reveal.in { opacity:1; transform:none; }
+
+    /* --------------------------
+       RESPONSIVE ADJUSTMENTS
+       --------------------------*/
+    @media (max-width:900px){
+      .about { grid-template-columns: 1fr; }
+      .grid { gap:28px; }
+    }
+    @media (max-width:480px){
+      .title { font-size:1.9rem; }
+      .subtitle { display:block; width:100%; border-right:none; animation:none; }
+      .cta-row { justify-content:center; }
+    }
+
+    /* reduce motion preference */
+    @media (prefers-reduced-motion: reduce){
+      * { animation-duration: 0.001ms !important; transition-duration: 0.001ms !important; }
+      .cursor { display:none; }
+    }
+  </style>
+</head>
+<body>
+  <!-- CUSTOM CURSOR -->
+  <div class="cursor" id="cursor"></div>
+
+  <!-- TOP BAR with theme toggle -->
+  <div class="topbar" role="navigation" aria-label="Top bar">
+    <div class="brand" aria-hidden="true">
+      <span class="dot"></span>
+      <h4>Discover Arko</h4>
+    </div>
+    <button class="toggle-btn" id="themeToggle" title="Toggle theme (dark/light)">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" style="display:block">
+        <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <span style="font-size:0.92rem">Theme</span>
+    </button>
+  </div>
+
+  <!-- single page container for fade in -->
+  <main class="page" id="page">
+    <div class="wrap">
+      <div class="grid">
+        <!-- LEFT: hero text -->
+        <div class="hero reveal">
+          <div class="eyebrow"></div>
+          <!-- Replace the text below with your name -->
+          <div class="title" id="nameTitle">Arman Hossain (Arko) </div>
+
+          <!-- Replace subtitle content -->
+          <div class="subtitle" id="subtitle">Bio: A gentleman with boundaries.</div>
+
+          <p class="lead"> ⁕Nickname: Arko </p>
+          <p class="lead"> ⁕Blood Group: AB+ </p>
+          <p class="lead"> ⁕Date of Birth: 30-10-2009 </p>
+          <p class="lead"> ⁕Emergency contact_Phone: +8801720621313,+8801971330976 </p>
+          <p class="lead"> ⁕Address: Joypurhat/Pabna</p>
+
+
+
+          <div class="cta-row">
+            <a class="btn primary" href="#about" id="ctaLearn"><svg width="16" height="16" viewBox="0 0 24 24" style="display:block"><path d="M12 2v20M2 12h20" stroke="rgba(255,255,255,0.95)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg> Learn more</a>
+            <a class="btn" href="mailto:arkoarman55@gmail.com" id="ctaContact"><svg width="16" height="16" viewBox="0 0 24 24" style="display:block"><path d="M3 8l9 6 9-6" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg> Sent email</a>
+          </div>
+        </div>
+
+        <!-- RIGHT: photo card -->
+        <div class="card reveal" id="photoCard" aria-label="Profile card">
+          <div style="position:relative;">
+            <div class="photo-wrap" id="photoWrap" style="height:420px;">
+              <!-- Replace the image src with your photo or local filename -->
+              <img id="profileImg" src="arko2.jpg" alt="Profile photo">
+              <div class="glass-badge">
+                <h5>AR KO</h5>
+                <p>ME</p>
+              </div>
+              <div class="glow-circle" aria-hidden="true"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ABOUT + ACHIEVEMENTS -->
+      <section class="about" id="about">
+        <div class="panel reveal">
+          <h3>About Me</h3>
+          <p>
+          I’m a student who’s working hard to build a successful and meaningful life. My main goal is to become a wealthy person, not just in money, but in knowledge, experience, and character. I want to be someone who inspires others, so becoming a motivational speaker is one of my long-term dreams.
+‎
+‎          Outside of studies, I’m passionate about photography, modeling, photo editing, and traveling. I love exploring new places, meeting people, and capturing moments that tell a story. Every new experience teaches me something about life and growth.
+‎
+‎          I believe success comes from consistency, confidence, and staying true to yourself and that’s exactly how I try to live every day.
+
+          </p>
+
+         
+
+        <!-- RIGHT SIDE: Socials and quick links -->
+        <aside class="panel reveal" aria-label="Quick links">
+          <h3>Connect with me</h3>
+          <p style="margin-top:6px; color:var(--muted)"> Find me on </p>
+
+          <div class="socials" style="margin-top:14px;">
+            <!-- Edit href attributes with your usernames/numbers -->
+            <a class="social-btn" id="instaBtn" href="https://www.instagram.com/_arkuuuuu?igsh=a25kajRqMGpyeXBj" target="_blank" rel="noopener">
+              <svg class="sicon" viewBox="0 0 512 512" fill="none" aria-hidden="true"><circle cx="256" cy="256" r="96" stroke="white" stroke-width="20" /></svg>
+              Instagram
+            </a>
+
+            <a class="social-btn" id="fbBtn" href="https://www.facebook.com/profile.php?id=100093643453614" target="_blank" rel="noopener">
+              <svg class="sicon" viewBox="0 0 24 24"><path d="M22 12.07C22 6.59 17.52 2 12 2S2 6.59 2 12.07c0 5.02 3.66 9.17 8.44 9.95v-7.05H7.9v-2.9h2.54V9.4c0-2.5 1.49-3.88 3.77-3.88 1.09 0 2.24.2 2.24.2v2.47h-1.26c-1.24 0-1.63.77-1.63 1.56v1.88h2.78l-.44 2.9h-2.34v7.05C18.34 21.24 22 17.09 22 12.07z" fill="white"/></svg>
+              Facebook
+            </a>
+
+           
+          </div>
+
+          <div style="margin-top:18px; display:flex; gap:8px; flex-wrap:wrap;">
+          
+          </div>
+        </aside>
+      </section>
+
+      <!-- FOOTER -->
+      <footer class="reveal">
+        © <span id="year"></span> <strong style="color:var(--accent1)">AR KO</strong> — Thanks for visiting. 
+      </footer>
+    </div>
+  </main>
+
+  <!-- --------------------------
+       SCRIPTS (particles, cursor, tilt, reveal, theme)
+       ---------------------------->
+  <script>
+    /* --------------------------
+       Page ready / transitions
+       --------------------------*/
+    const page = document.getElementById('page');
+    window.addEventListener('load', ()=> {
+      page.classList.add('loaded');
+      document.getElementById('year').textContent = new Date().getFullYear();
+      // small delay to allow entrance animations
+      setTimeout(()=> { observeReveal(); }, 120);
+    });
+
+    /* --------------------------
+       Custom cursor (glowing dot)
+       --------------------------*/
+    const cursor = document.getElementById('cursor');
+    let mouseX = -100, mouseY = -100, cursorVisible = true;
+    document.addEventListener('mousemove', (e) => {
+      mouseX = e.clientX; mouseY = e.clientY;
+      cursor.style.left = mouseX + 'px';
+      cursor.style.top = mouseY + 'px';
+      cursor.classList.remove('hidden');
+    });
+    document.addEventListener('mouseenter', () => cursor.classList.remove('hidden'));
+    document.addEventListener('mouseleave', () => cursor.classList.add('hidden'));
+    // enlarge cursor on interactive elements
+    const interactive = ['a', 'button', '.btn', '.social-btn'];
+    interactive.forEach(sel=>{
+      document.addEventListener('mouseover', e=>{
+        if (e.target.closest(sel)){
+          cursor.classList.add('small');
+          cursor.style.transform = 'translate(-50%, -50%) scale(1.9)';
+        }
+      });
+      document.addEventListener('mouseout', e=>{
+        if (e.target.closest(sel)){
+          cursor.classList.remove('small');
+          cursor.style.transform = 'translate(-50%, -50%) scale(1)';
+        }
+      });
+    });
+
+    /* --------------------------
+       PARTICLES (canvas background, mouse-reactive)
+       --------------------------*/
+    (function(){
+      const canvas = document.createElement('canvas');
+      canvas.id = 'pcanvas';
+      canvas.style.position='fixed';
+      canvas.style.left=0; canvas.style.top=0;
+      canvas.style.width='100%'; canvas.style.height='100%';
+      canvas.style.zIndex=0;
+      canvas.style.pointerEvents='none';
+      document.body.appendChild(canvas);
+      const ctx = canvas.getContext('2d');
+      let W = canvas.width = innerWidth;
+      let H = canvas.height = innerHeight;
+
+      window.addEventListener('resize', ()=>{ W = canvas.width = innerWidth; H = canvas.height = innerHeight; });
+
+      const particles = [];
+      const max = Math.min(160, Math.floor((W*H)/8000));
+      for (let i=0;i<max;i++){
+        particles.push({
+          x: Math.random()*W,
+          y: Math.random()*H,
+          r: Math.random()*1.5 + 0.6,
+          vx: (Math.random()-0.5)*0.3,
+          vy: (Math.random()-0.5)*0.3,
+          hue:  Math.random()*360
+        });
+      }
+      let mouse = {x: W/2, y: H/2, down:false};
+      window.addEventListener('mousemove', (e)=>{ mouse.x=e.clientX; mouse.y=e.clientY; });
+      window.addEventListener('mousedown', ()=> mouse.down=true);
+      window.addEventListener('mouseup', ()=> mouse.down=false);
+
+      function draw(){
+        ctx.clearRect(0,0,W,H);
+        // soft vignette
+        // ctx.fillStyle = 'rgba(0,0,0,0.05)'; ctx.fillRect(0,0,W,H);
+        for (let p of particles){
+          p.x += p.vx + (mouse.x - p.x) * 0.0008;
+          p.y += p.vy + (mouse.y - p.y) * 0.0008;
+          if (p.x<0) p.x = W;
+          if (p.x>W) p.x = 0;
+          if (p.y<0) p.y = H;
+          if (p.y>H) p.y = 0;
+
+          ctx.beginPath();
+          const g = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.r*12);
+          const color = `hsla(${(180 + p.hue)%360},90%,60%,` + (p.r*0.12 + 0.06) + ')';
+          g.addColorStop(0, color);
+          g.addColorStop(0.6, 'rgba(124,58,237,0.06)');
+          g.addColorStop(1, 'rgba(0,0,0,0)');
+          ctx.fillStyle = g;
+          ctx.arc(p.x,p.y,p.r*6,0,Math.PI*2);
+          ctx.fill();
+
+          // tiny dot
+          ctx.beginPath();
+          ctx.fillStyle = `rgba(255,255,255,${0.6*p.r})`;
+          ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+          ctx.fill();
+        }
+
+        // draw subtle lines between nearby particles
+        for (let i=0;i<particles.length;i++){
+          for (let j=i+1;j<particles.length;j++){
+            const a = particles[i], b = particles[j];
+            const dx = a.x-b.x, dy = a.y-b.y;
+            const d2 = dx*dx + dy*dy;
+            if (d2 < 9000){
+              ctx.beginPath();
+              ctx.strokeStyle = 'rgba(124,58,237,0.03)';
+              ctx.lineWidth=1;
+              ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y);
+              ctx.stroke();
+            }
+          }
+        }
+
+        requestAnimationFrame(draw);
+      }
+      draw();
+    })();
+
+    /* --------------------------
+       PHOTO 3D TILT
+       --------------------------*/
+    (function(){
+      const wrap = document.getElementById('photoWrap');
+      if (!wrap) return;
+      let rect = wrap.getBoundingClientRect();
+      function onMove(e){
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        const cx = rect.width/2, cy = rect.height/2;
+        const dx = (x - cx) / cx;
+        const dy = (y - cy) / cy;
+        const rx = (dy)*8; // tilt x
+        const ry = -(dx)*12; // tilt y
+        wrap.style.transform = `rotateX(${rx}deg) rotateY(${ry}deg) translateZ(0)`;
+      }
+      function reset(){ wrap.style.transform = `rotateX(0deg) rotateY(0deg)`; }
+      wrap.addEventListener('mousemove', (e)=>{ rect = wrap.getBoundingClientRect(); onMove(e); });
+      wrap.addEventListener('mouseleave', reset);
+      // touch friendly: small parallax on touchmove
+      wrap.addEventListener('touchmove', (e)=>{ rect = wrap.getBoundingClientRect(); onMove(e.touches[0]); });
+    })();
+
+    /* --------------------------
+       REVEAL ON SCROLL using IntersectionObserver
+       --------------------------*/
+    function observeReveal(){
+      const items = document.querySelectorAll('.reveal');
+      const io = new IntersectionObserver((entries)=>{
+        entries.forEach(ent=>{
+          if (ent.isIntersecting){
+            ent.target.classList.add('in');
+            io.unobserve(ent.target);
+          }
+        });
+      }, {threshold:0.12});
+      items.forEach(i => io.observe(i));
+    }
+
+    /* --------------------------
+       THEME TOGGLE (dark/light)
+       --------------------------*/
+    const themeBtn = document.getElementById('themeToggle');
+    themeBtn.addEventListener('click', ()=>{
+      document.body.classList.toggle('light');
+      // small pulse
+      themeBtn.animate([{transform:'scale(1.03)'},{transform:'scale(1)'}],{duration:260});
+    });
+
+    /* --------------------------
+       QUICK: animated text width fallback for subtitle in mobile
+       --------------------------*/
+    // If width animation didn't run (small screens), just set visible
+    setTimeout(()=> {
+      const sub = document.getElementById('subtitle');
+      if (window.getComputedStyle(sub).width === '0px') sub.style.width = '100%';
+    }, 4200);
+
+    /* --------------------------
+       SMOOTH SCROLL for anchor links
+       --------------------------*/
+    document.querySelectorAll('a[href^="#"]').forEach(a=>{
+      a.addEventListener('click', function(e){
+        e.preventDefault();
+        const target = document.querySelector(this.getAttribute('href'));
+        if (target){
+          target.scrollIntoView({behavior:'smooth', block:'center'});
+        }
+      });
+    });
+
+    /* --------------------------
+       SOCIAL ICON HOVER: small animated pulse (pure js to avoid heavy css)
+       --------------------------*/
+    document.querySelectorAll('.social-btn').forEach(btn=>{
+      btn.addEventListener('mouseenter', ()=> {
+        btn.animate([{transform:'translateY(-6px) scale(1.03)'},{transform:'translateY(-3px) scale(1.01)'},{transform:'translateY(-6px) scale(1.03)'}],{duration:600, iterations:1});
+      });
+    });
+
+    /* --------------------------
+       Optional: Replace placeholders quickly (small helper)
+       --------------------------*/
+    // Replace these with your real data if you want to programmatically set:
+    (function fillPlaceholders(){
+      // document.getElementById('nameTitle').textContent = 'Your Full Name';
+      // document.getElementById('profileImg').src = 'your-photo.jpg';
+      // document.getElementById('ctaContact').href = 'mailto:youremail@example.com';
+      // document.getElementById('instaBtn').href = 'https://www.instagram.com/yourusername';
+      // document.getElementById('fbBtn').href = 'https://www.facebook.com/yourusername';
+      // document.getElementById('waBtn').href = 'https://wa.me/8801XXXXXXXXX';
+    })();
+
+    /* --------------------------
+       Accessibility: keyboard hides custom cursor when tabbing
+       --------------------------*/
+    window.addEventListener('keydown', (e)=> {
+      if (e.key === 'Tab') cursor.classList.add('hidden');
+    });
+    window.addEventListener('click', ()=> cursor.classList.remove('hidden'));
+
+  </script>
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Welcome Voice Example</title>
+</head>
+<body>
+
+
+
+<script>
+  function speakWelcome() {
+    // Check if browser supports Speech Synthesis
+    if ('speechSynthesis' in window) {
+      const msg = new SpeechSynthesisUtterance("Hello, Thank you for visiting!");
+      msg.lang = 'en-US'; // Language, change if needed
+      window.speechSynthesis.speak(msg);
+    } else {
+      console.log("Sorry, your browser does not support speech synthesis.");
+    }
+  }
+
+  // Try to speak after load
+  window.addEventListener('load', () => {
+    // Small timeout to avoid immediate autoplay block
+    setTimeout(() => {
+      speakWelcome();
+    }, 500);
+  });
+
+  // Optional: handle user interaction fallback
+  document.body.addEventListener('click', () => {
+    if (window.speechSynthesis.speaking === false) {
+      speakWelcome();
+    }
+  }, { once: true });
+</script>
+
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>
